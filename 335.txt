@@ -1,0 +1,108 @@
+﻿/**
+*@author: elaine_liu
+*@date: 2016.03.10
+*@attention: 判断线段相交、基本类型的范围大小
+*/
+
+public class Solution{
+
+public boolean isSelfCrossing(int[] x)
+	{
+		//要注意的问题是，坐标点要比x的长度多1
+		Point[] point = new Point[x.length + 1];
+		for (int i = 0; i < point.length; i++) {
+			point[i] = new Point(0,0);
+		}
+		constructPoint(point, x);
+		if(point.length < 5)
+			return false;
+		else {
+			for (int i = 0; i < point.length-1; i++) {
+				for (int j = i+3; j < point.length-1;j++) {
+					if(lineCross(point[i], point[i+1], point[j], point[j+1]))
+						return true;
+				}				
+			}
+		}
+		return false;
+	}
+	
+	public boolean lineCross(Point p0, Point p1, Point p3, Point p4)
+	{
+		//要从两条线段分别考虑叉积是否为负数，否则如果只从一条线段判断，有可能造成两条线段没相交但是叉积为负数
+		//纠结了好久，原来用int类型定义下面四个变量，结果计算错误，改成long型才对了，天……
+		long line_original1 = (p3.x-p0.x)*(p1.y-p0.y)-(p1.x-p0.x)*(p3.y-p0.y); //(p3-p0)x(p1-p0)
+		long line_compared1 = (p4.x-p0.x)*(p1.y-p0.y)-(p1.x-p0.x)*(p4.y-p0.y); //(p4-p0)x(p1-p0)
+		long line_original2 = (p1.x-p3.x)*(p4.y-p3.y)-(p4.x-p3.x)*(p1.y-p3.y); //(p1-p3)x(p4-p3)
+		long line_compared2 = (p0.x-p3.x)*(p4.y-p3.y)-(p4.x-p3.x)*(p0.y-p3.y); //(p0-p3)x(p4-p3)
+		
+		if(line_compared1*line_original1 < 0 && line_compared2*line_original2 < 0)
+			return true;
+
+		if(line_compared1*line_original1 == 0 && collinear(p0, p1, p3))
+			return true;
+		if(line_compared1*line_original1 == 0 && collinear(p0, p1, p4))
+			return true;
+		if(line_compared2*line_original2 == 0 && collinear(p3, p4, p0))
+			return true;
+		if(line_compared2*line_original2 == 0 && collinear(p3, p4, p1))
+			return true;
+		
+		return false;
+	}
+	
+	public boolean collinear(Point p0, Point p1, Point p3)
+	{
+		if(Math.min(p0.x, p1.x) <= p3.x && p3.x <= Math.max(p0.x, p1.x) && Math.min(p0.y, p1.y) <= p3.y && p3.y<= Math.max(p0.y, p1.y))
+			return true;
+		return false;
+	}
+	
+	public void constructPoint(Point[] p, int[] x)
+	{
+		p[0].setLocation(0, 0);
+		for (int i = 1; i < p.length; i++) {
+			if(i%4 == 1)
+			{
+				p[i].setLocation(p[i-1].x, p[i-1].y + x[i-1]);
+				continue;
+			}
+			if(i%4 == 2)
+			{
+				p[i].setLocation(p[i-1].x - x[i-1], p[i-1].y);
+				continue;
+			}
+			if(i%4 == 3)
+			{
+				p[i].setLocation(p[i-1].x, p[i-1].y - x[i-1]);
+				continue;
+			}
+			if (i%4 == 0) 
+			{
+				p[i].setLocation(p[i-1].x + x[i-1], p[i-1].y);
+			}
+		}
+	}
+	class Point{
+        public int x;
+        public int y;
+        public Point() 
+        {
+            this(0, 0);
+        }
+        public Point(Point p) 
+        {
+            this(p.x, p.y);
+        }
+        public Point(int x, int y) 
+        {
+            this.x = x;
+            this.y = y;
+        }
+        public void setLocation(int x, int y)
+        {
+            this.x = x;
+            this.y = y;
+        }
+    }
+}
